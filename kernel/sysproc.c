@@ -37,6 +37,25 @@ sys_trace(void)
   return 0;
 }
 
+#include "sysinfo.h"
+extern uint64 get_free_bytes(void);
+extern uint64 get_unused_procs(void);
+uint64
+sys_sysinfo(void)
+{
+  struct proc *p = myproc();
+  struct sysinfo ksi;
+  ksi.freemem = get_free_bytes();
+  ksi.nproc = get_unused_procs();
+  uint64 si; // user pointer to struct sysinfo
+  if(argaddr(0, &si) < 0)
+    return -1;
+
+  if(copyout(p->pagetable, si, (char *)&ksi, sizeof(ksi)) < 0)
+    return -1;
+  return 0;
+}
+
 uint64
 sys_wait(void)
 {
