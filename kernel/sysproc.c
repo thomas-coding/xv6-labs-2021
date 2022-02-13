@@ -97,3 +97,24 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+uint64 sys_sigalarm(void)
+{
+    if(argint(0, &myproc()->ticks) < 0 || argaddr(1, &myproc()->fn) < 0){
+        return -1;
+    }
+	return 0;
+}
+
+uint64 sys_sigreturn(void)
+{
+	// Restore cortext
+	uint64 *cortext = (uint64 *)myproc()->trapframe;
+
+	for(int i = 0; i < sizeof(struct trapframe); i++) {
+		cortext[i] = myproc()->alarm_cortext[i];
+	}
+	myproc()->in_alarm_function = 0;
+	return 0;
+}
